@@ -1,0 +1,9 @@
+# Consumer workspace the demo creates Apps in.
+apiVersion: tenancy.kcp.io/v1alpha1
+kind: Workspace
+metadata:
+  name: demo
+spec:
+  type:
+    name: universal
+    path: root

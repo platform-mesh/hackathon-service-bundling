@@ -1,0 +1,28 @@
+# Makes the App API exported from the root workspace available in the demo workspace.
+apiVersion: apis.kcp.io/v1alpha2
+kind: APIBinding
+metadata:
+  name: juiceshop.com
+spec:
+  reference:
+    export:
+      path: root
+      name: juiceshop.com
+  permissionClaims:
+  # identityHash is the fixed identity of the postgresql.cnpg.io APIExport
+  - group: postgresql.cnpg.io
+    resource: clusters
+    identityHash: baf698c16450117dbe6aee29419e1553d1c39cce63a080adfedd229a1d9c9391
+    verbs: ["create"]
+    selector:
+      matchAll: true
+    state: Accepted
+  # Lets the app operator read the credentials CloudNativePG generates for an
+  # App's database, and no other secrets in this workspace.
+  - group: ""
+    resource: secrets
+    verbs: ["get", "list", "watch"]
+    selector:
+      matchLabels:
+        cnpg.io/userType: app
+    state: Accepted

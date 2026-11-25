@@ -1,0 +1,64 @@
+version: "3"
+
+vars:
+  CONTROLLER_TOOLS_VERSION: v0.23.0
+  CONTROLLER_GEN: go run sigs.k8s.io/controller-tools/cmd/controller-gen@{{.CONTROLLER_TOOLS_VERSION}}
+  KCP_SDK_VERSION: v0.33.6
+  APIGEN: go run github.com/kcp-dev/sdk/cmd/apigen@{{.KCP_SDK_VERSION}}
+
+tasks:
+  default:
+    desc: List available tasks
+    silent: true
+    cmds:
+      - task --list
+
+  codegen:
+    desc: Run all code generation (deepcopy + CRDs + ResourceSchema + APIExport)
+    cmds:
+      - task: generate
+      - task: manifests
+      - task: kcp-manifests
+
+  generate:
+    desc: Generate DeepCopy, DeepCopyInto and DeepCopyObject method implementations
+    cmds:
+      - '{{.CONTROLLER_GEN}} object paths="./..."'
+
+  manifests:
+    desc: Generate CustomResourceDefinitions into config/crd/bases
+    cmds:
+      - '{{.CONTROLLER_GEN}} crd paths="./..." output:crd:artifacts:config=config/crd/bases'
+
+  kcp-manifests:
+    desc: Generate the kcp APIResourceSchema and APIExport from the CRDs into config/kcp
+    cmds:
+      - '{{.APIGEN}} --input-dir config/crd/bases --output-dir config/kcp'
+
+  fmt:
+    desc: Run go fmt against code
+    cmds:
+      - go fmt ./...
+
+  vet:
+    desc: Run go vet against code
+    cmds:
+      - go vet ./...
+
+  build:
+    desc: Build the manager binary
+    deps: [codegen]
+    cmds:
+      - go build -o bin/manager ./cmd
+
+  run:
+    desc: Run the operator against the cluster in the current kubeconfig
+    deps: [codegen]
+    cmds:
+      - go run ./cmd {{.CLI_ARGS}}
+
+  demo:
+    desc: Demo on a local kcp - start kcp, export the App API, run the controller, create/delete/re-create the sample App
+    cmds:
+      - task: build
+      - ./hack/demo.sh

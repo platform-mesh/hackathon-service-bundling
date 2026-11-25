@@ -1,0 +1,6 @@
+apiVersion: juiceshop.com/v1alpha1
+kind: App
+metadata:
+  name: my-app
+spec:
+  name: my-app

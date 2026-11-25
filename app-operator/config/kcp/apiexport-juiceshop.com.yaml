@@ -1,0 +1,26 @@
+apiVersion: apis.kcp.io/v1alpha2
+kind: APIExport
+metadata:
+  name: juiceshop.com
+spec:
+  permissionClaims:
+  - defaultSelector:
+      matchLabels:
+        cnpg.io/userType: app
+    resource: secrets
+    verbs:
+    - get
+    - list
+    - watch
+  - group: postgresql.cnpg.io
+    identityHash: baf698c16450117dbe6aee29419e1553d1c39cce63a080adfedd229a1d9c9391
+    resource: clusters
+    verbs:
+    - create
+  resources:
+  - group: juiceshop.com
+    name: apps
+    schema: v261125-d3f3f67.apps.juiceshop.com
+    storage:
+      crd: {}
+status: {}
